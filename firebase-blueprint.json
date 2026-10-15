@@ -1,0 +1,238 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access information and subscribed areas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique user ID" },
+        "name": { "type": "string", "maxLength": 100, "description": "User's full name" },
+        "email": { "type": "string", "maxLength": 150, "description": "User email address" },
+        "phoneNumber": { "type": "string", "maxLength": 30, "description": "User contact number" },
+        "role": {
+          "type": "string",
+          "enum": ["citizen", "utility_provider", "lgu", "verification_team", "admin"],
+          "description": "Role in the PhilSePush system"
+        },
+        "organization": { "type": "string", "maxLength": 150, "description": "Organization name if utility or LGU" },
+        "verified": { "type": "boolean", "description": "Whether user is verified" },
+        "savedAreaIds": { "type": "array", "description": "List of saved area IDs" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of creation" }
+      },
+      "required": ["id", "name", "email", "role", "verified", "createdAt"]
+    },
+    "Outage": {
+      "title": "Outage",
+      "description": "Power interruption event with real-time status and verification attributes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique outage identifier" },
+        "areaId": { "type": "string", "description": "Associated area identifier" },
+        "region": { "type": "string", "maxLength": 80, "description": "Philippine administrative region" },
+        "province": { "type": "string", "maxLength": 80, "description": "Province name" },
+        "cityMunicipality": { "type": "string", "maxLength": 80, "description": "City or Municipality" },
+        "barangay": { "type": "string", "maxLength": 100, "description": "Barangay name" },
+        "subdivisionVillage": { "type": "string", "maxLength": 120, "description": "Subdivision or village name" },
+        "latitude": { "type": "number", "description": "Geographic latitude" },
+        "longitude": { "type": "number", "description": "Geographic longitude" },
+        "startedAt": { "type": "string", "description": "ISO timestamp when outage started" },
+        "restoredAt": { "type": "string", "description": "ISO timestamp when power restored" },
+        "estimatedRestorationAt": { "type": "string", "description": "ISO timestamp of estimated restoration" },
+        "status": {
+          "type": "string",
+          "enum": ["Investigating", "Repairing", "Restoring", "Restored"],
+          "description": "Current lifecycle status of outage"
+        },
+        "communityReportedCause": { "type": "string", "maxLength": 200, "description": "Citizen reported reason" },
+        "officialConfirmedCause": { "type": "string", "maxLength": 300, "description": "Utility verified reason" },
+        "peopleAffected": { "type": "number", "description": "Count of confirmed affected individuals" },
+        "verified": { "type": "boolean", "description": "Whether confirmed by verifier or provider" },
+        "verificationStatus": {
+          "type": "string",
+          "enum": ["pending", "verified", "rejected"],
+          "description": "Status of verification workflow"
+        },
+        "disputed": { "type": "boolean", "description": "Whether marked as disputed by community" },
+        "disputeReason": { "type": "string", "maxLength": 250, "description": "Community dispute explanation" },
+        "frequencyType": { "type": "string", "enum": ["chronic", "one-time"], "description": "Outage frequency tag" },
+        "provider": { "type": "string", "maxLength": 100, "description": "Electric utility provider name" },
+        "createdBy": { "type": "string", "description": "UID of creator or submitter" },
+        "createdAt": { "type": "string", "description": "ISO timestamp created" },
+        "updatedAt": { "type": "string", "description": "ISO timestamp updated" }
+      },
+      "required": ["id", "areaId", "region", "province", "cityMunicipality", "barangay", "latitude", "longitude", "startedAt", "status", "communityReportedCause", "peopleAffected", "verified", "verificationStatus", "frequencyType", "provider", "createdAt", "updatedAt"]
+    },
+    "OutageReport": {
+      "title": "OutageReport",
+      "description": "Citizen power outage report submitted for triage and verification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Report ID" },
+        "outageId": { "type": "string", "description": "Linked outage ID if aggregated" },
+        "reporterId": { "type": "string", "description": "Reporter user UID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Reporter name" },
+        "contactNumber": { "type": "string", "maxLength": 30, "description": "Reporter contact number for verification" },
+        "areaId": { "type": "string", "description": "Associated area ID" },
+        "region": { "type": "string", "maxLength": 80, "description": "Region" },
+        "province": { "type": "string", "maxLength": 80, "description": "Province" },
+        "cityMunicipality": { "type": "string", "maxLength": 80, "description": "City/Municipality" },
+        "barangay": { "type": "string", "maxLength": 100, "description": "Barangay" },
+        "subdivisionVillage": { "type": "string", "maxLength": 120, "description": "Subdivision" },
+        "latitude": { "type": "number", "description": "Latitude coordinate" },
+        "longitude": { "type": "number", "description": "Longitude coordinate" },
+        "outageStartTime": { "type": "string", "description": "Reported incident time" },
+        "reportedCause": { "type": "string", "maxLength": 200, "description": "Observed cause" },
+        "additionalNotes": { "type": "string", "maxLength": 500, "description": "Citizen notes" },
+        "attachmentUrls": { "type": "array", "description": "Photo URLs uploaded as proof" },
+        "verificationStatus": {
+          "type": "string",
+          "enum": ["pending", "verified", "rejected"],
+          "description": "Triage status"
+        },
+        "rejectionReason": { "type": "string", "maxLength": 250, "description": "Verifier rejection explanation" },
+        "meTooCount": { "type": "number", "description": "Number of community confirmations" },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["id", "reporterId", "name", "contactNumber", "areaId", "region", "province", "cityMunicipality", "barangay", "outageStartTime", "reportedCause", "verificationStatus", "meTooCount", "createdAt"]
+    },
+    "CommunityUpdate": {
+      "title": "CommunityUpdate",
+      "description": "Crowdsourced ground status update from affected residents",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Update ID" },
+        "outageId": { "type": "string", "description": "Target outage ID" },
+        "userId": { "type": "string", "description": "Author UID if logged in" },
+        "name": { "type": "string", "maxLength": 100, "description": "Display name of citizen" },
+        "contactNumber": { "type": "string", "maxLength": 30, "description": "Optional contact number" },
+        "message": { "type": "string", "maxLength": 500, "description": "Update comment or observation" },
+        "impactTag": {
+          "type": "string",
+          "enum": ["Home", "Business", "Hospital", "School", "Other"],
+          "description": "Sector impact category"
+        },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["id", "outageId", "name", "message", "impactTag", "createdAt"]
+    },
+    "OfficialUpdate": {
+      "title": "OfficialUpdate",
+      "description": "Authoritative progress bulletin from power utility or LGU",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Update ID" },
+        "outageId": { "type": "string", "description": "Target outage ID" },
+        "authorId": { "type": "string", "description": "Author UID" },
+        "authorName": { "type": "string", "maxLength": 100, "description": "Official author name" },
+        "organization": { "type": "string", "maxLength": 150, "description": "Provider or LGU unit" },
+        "organizationType": {
+          "type": "string",
+          "enum": ["utility", "lgu", "agency"],
+          "description": "Entity category"
+        },
+        "message": { "type": "string", "maxLength": 600, "description": "Official bulletin text" },
+        "actionTaken": { "type": "string", "maxLength": 300, "description": "Technical actions performed" },
+        "createdAt": { "type": "string", "description": "ISO timestamp" },
+        "verified": { "type": "boolean", "description": "Verified official badge" }
+      },
+      "required": ["id", "outageId", "authorId", "authorName", "organization", "organizationType", "message", "createdAt", "verified"]
+    },
+    "ScheduledOutage": {
+      "title": "ScheduledOutage",
+      "description": "Planned maintenance or grid upgrade notice",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Scheduled ID" },
+        "areaId": { "type": "string", "description": "Target area ID" },
+        "areaName": { "type": "string", "maxLength": 100, "description": "Area location name" },
+        "provider": { "type": "string", "maxLength": 100, "description": "Utility provider name" },
+        "reason": { "type": "string", "maxLength": 300, "description": "Maintenance explanation" },
+        "startAt": { "type": "string", "description": "Start ISO timestamp" },
+        "endAt": { "type": "string", "description": "End ISO timestamp" },
+        "status": {
+          "type": "string",
+          "enum": ["Upcoming", "In Progress", "Completed"],
+          "description": "Schedule status"
+        },
+        "affectedBarangays": { "type": "array", "description": "List of affected barangays" },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["id", "areaId", "areaName", "provider", "reason", "startAt", "endAt", "status", "affectedBarangays", "createdAt"]
+    },
+    "AppNotification": {
+      "title": "AppNotification",
+      "description": "Push notification and alert record for users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Notification ID" },
+        "userId": { "type": "string", "description": "Target user UID" },
+        "type": {
+          "type": "string",
+          "enum": ["outage_alert", "status_change", "restored", "report_verified", "scheduled_maintenance", "community_update"],
+          "description": "Alert category"
+        },
+        "title": { "type": "string", "maxLength": 150, "description": "Notification title" },
+        "message": { "type": "string", "maxLength": 500, "description": "Notification body" },
+        "outageId": { "type": "string", "description": "Associated outage ID if any" },
+        "read": { "type": "boolean", "description": "Read status" },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["id", "userId", "type", "title", "message", "read", "createdAt"]
+    },
+    "Area": {
+      "title": "Area",
+      "description": "Geographical jurisdiction and utility franchise coverage area",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Area identifier" },
+        "region": { "type": "string", "maxLength": 80, "description": "Region" },
+        "province": { "type": "string", "maxLength": 80, "description": "Province" },
+        "cityMunicipality": { "type": "string", "maxLength": 80, "description": "City/Municipality" },
+        "district": { "type": "string", "maxLength": 80, "description": "District" },
+        "barangay": { "type": "string", "maxLength": 100, "description": "Barangay" },
+        "subdivisionVillage": { "type": "string", "maxLength": 120, "description": "Subdivision/Village" },
+        "latitude": { "type": "number", "description": "Center latitude" },
+        "longitude": { "type": "number", "description": "Center longitude" },
+        "supported": { "type": "boolean", "description": "Whether fully supported by PhilSePush" },
+        "utilityProvider": { "type": "string", "maxLength": 100, "description": "Electric utility provider" },
+        "lguName": { "type": "string", "maxLength": 120, "description": "LGU disaster risk reduction name" },
+        "createdAt": { "type": "string", "description": "ISO timestamp" }
+      },
+      "required": ["id", "region", "province", "cityMunicipality", "barangay", "latitude", "longitude", "supported", "utilityProvider", "lguName", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User account information and saved preferences"
+    },
+    "/outages/{outageId}": {
+      "schema": { "$ref": "#/entities/Outage" },
+      "description": "Verified and ongoing power outages across the Philippines"
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/OutageReport" },
+      "description": "Citizen outage reports submitted for verification and aggregation"
+    },
+    "/community_updates/{updateId}": {
+      "schema": { "$ref": "#/entities/CommunityUpdate" },
+      "description": "Real-time crowdsourced reports and notes from local residents"
+    },
+    "/official_updates/{updateId}": {
+      "schema": { "$ref": "#/entities/OfficialUpdate" },
+      "description": "Official bulletins and progress logs from utilities and LGUs"
+    },
+    "/scheduled_outages/{scheduledId}": {
+      "schema": { "$ref": "#/entities/ScheduledOutage" },
+      "description": "Scheduled power maintenance announcements"
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/AppNotification" },
+      "description": "User-specific outage notifications and alerts"
+    },
+    "/areas/{areaId}": {
+      "schema": { "$ref": "#/entities/Area" },
+      "description": "Geographical jurisdiction definitions and franchise boundaries"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "PhilSePush Test",
+  "description": "Philippine community-driven power outage monitoring and reporting platform providing real-time location-specific updates, verified reports, and reliability tracking.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

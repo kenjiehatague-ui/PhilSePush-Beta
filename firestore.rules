@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.uid == 'XojG37IWFMgitFnj7EieMbE2Abm2' ||
+        request.auth.uid == 'N3kCJHwK4HcTXhWhutz7hkzQBWm1' ||
+        request.auth.uid == 'oNiiAT9AUmPz2hlxwitnzwSmH3E3' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Users Collection (profiles and authorized roles)
+    match /users/{userId} {
+      allow get, list: if true;
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    // Outages Collection (Public live grid)
+    match /outages/{outageId} {
+      allow get, list: if true;
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    // Citizen Reports Collection
+    match /reports/{reportId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if true;
+      allow update: if isSignedIn() || (
+        incoming().diff(existing()).affectedKeys().hasOnly(['meTooCount'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Community Updates
+    match /community_updates/{updateId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update, delete: if isSignedIn();
+    }
+
+    // Official Updates (Bulletins from utilities and LGUs)
+    match /official_updates/{updateId} {
+      allow get, list: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Scheduled Maintenance Outages
+    match /scheduled_outages/{scheduledId} {
+      allow get, list: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Areas & Franchise Jurisdiction
+    match /areas/{areaId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
